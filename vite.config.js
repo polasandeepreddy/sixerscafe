@@ -23,10 +23,10 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ["react", "react-dom", "react-router-dom"],
-          // Group tailwind-merge separately to avoid resolution issues
-          ui: ["clsx", "class-variance-authority", "lucide-react"],
+          ui: ["clsx", "lucide-react"], // Removed class-variance-authority from here
           "tailwind-merge": ["tailwind-merge"],
           supabase: ["@supabase/supabase-js"],
+          // class-variance-authority will be bundled normally (default chunk)
         },
       },
     },
