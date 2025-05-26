@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { twMerge } from 'tailwind-merge'
-
+import { twMerge } from 'tailwind-merge'  // <-- import already present
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,9 +38,10 @@ const Header = () => {
             <Link
               key={path}
               to={path}
-              className={`text-decoration-none fs-5 ${
+              className={twMerge(
+                "text-decoration-none fs-5",
                 pathname === path ? "text-success fw-semibold" : "text-secondary"
-              }`}
+              )}
             >
               {label}
             </Link>
@@ -58,9 +58,10 @@ const Header = () => {
                 key={path}
                 to={path}
                 onClick={() => setIsMenuOpen(false)}
-                className={`text-decoration-none fs-5 ${
+                className={twMerge(
+                  "text-decoration-none fs-5",
                   pathname === path ? "text-success fw-semibold" : "text-secondary"
-                }`}
+                )}
               >
                 {label}
               </Link>

@@ -24,6 +24,7 @@ export default defineConfig({
         manualChunks: {
           react: ["react", "react-dom", "react-router-dom"],
           ui: ["clsx", "lucide-react"], // Removed class-variance-authority from here
+          "tailwind-merge": ["tailwind-merge"],
           supabase: ["@supabase/supabase-js"],
           // class-variance-authority will be bundled normally (default chunk)
         },
