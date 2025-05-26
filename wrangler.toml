@@ -1,15 +1,16 @@
 name = "cricket-box"
 compatibility_date = "2023-10-30"
 
-[site]
-bucket = "./dist"
-
 [build]
 command = "npm run build"
+# ✅ Add this line:
+pages_build_output_dir = "dist"
+
+[site]
+bucket = "./dist"
 
 [env.production]
 workers_dev = false
 
-# Enable the Pages Functions to handle client-side routing
 [build.processing]
-  skip_on_asset_pattern = ".*"
+skip_on_asset_pattern = ".*"
