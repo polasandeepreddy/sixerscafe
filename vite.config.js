@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -11,29 +10,28 @@ export default defineConfig({
     },
   },
   build: {
-    // Optimize for Cloudflare Pages
     target: "esnext",
     outDir: "dist",
     assetsDir: "assets",
     minify: "terser",
     terserOptions: {
       compress: {
-        drop_console: false, // Keep console logs for debugging
+        drop_console: false,
       },
     },
     rollupOptions: {
       output: {
         manualChunks: {
           react: ["react", "react-dom", "react-router-dom"],
-          ui: ["clsx", "tailwind-merge", "class-variance-authority", "lucide-react"],
+          // Group tailwind-merge separately to avoid resolution issues
+          ui: ["clsx", "class-variance-authority", "lucide-react"],
+          "tailwind-merge": ["tailwind-merge"],
           supabase: ["@supabase/supabase-js"],
         },
       },
     },
-    // Generate SPA fallback for client-side routing
     emptyOutDir: true,
   },
-  // Ensure dev server mimics production environment
   server: {
     port: 3000,
     strictPort: true,
