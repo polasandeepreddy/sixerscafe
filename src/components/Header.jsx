@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { twMerge } from 'tailwind-merge'
+
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
