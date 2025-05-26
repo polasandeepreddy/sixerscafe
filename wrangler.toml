@@ -1,0 +1,16 @@
+name = "cricket-box"
+compatibility_date = "2023-10-30"
+
+[build]
+command = "npm run build"
+# ✅ Add this line:
+pages_build_output_dir = "dist"
+
+[site]
+bucket = "./dist"
+
+[env.production]
+workers_dev = false
+
+[build.processing]
+skip_on_asset_pattern = ".*"
