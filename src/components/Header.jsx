@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { twMerge } from 'tailwind-merge'  // <-- import already present
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,17 +9,23 @@ const Header = () => {
   const navLinks = [
     { label: "Home", path: "/" },
     { label: "Book Slot", path: "/booking" },
-    { label: "Booking Status", path: "/status" },  // ✅ New link added here
+    { label: "Booking Status", path: "/status" },
     { label: "Admin", path: "/admin" },
   ];
 
   return (
     <header className="bg-white border-bottom shadow-sm position-sticky top-0 z-3">
-      <div className="container d-flex justify-content-between align-items-center py-3">
+      <div className="container d-flex justify-content-between align-items-center py-2.5">
         {/* Logo */}
         <Link to="/" className="d-flex align-items-center text-decoration-none">
-          <img src="/cricket-logo.png" alt="Sixers Cafe" className="me-2" height="40" width="40" />
-          <span className="fw-bold fs-4 text-dark">Sixers Cafe</span>
+          <img
+            src="/cricket-logo.png"
+            alt="Sixers Cafe"
+            className="me-2"
+            height="30"
+            width="30"
+          />
+          <span className="fw-bold fs-4 text-dark">Sixers cafe</span>
         </Link>
 
         {/* Mobile Toggle */}
@@ -29,7 +34,7 @@ const Header = () => {
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         >
-          {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          {isMenuOpen ? <X size={26} /> : <Menu size={26} />}
         </button>
 
         {/* Desktop Menu */}
@@ -38,10 +43,9 @@ const Header = () => {
             <Link
               key={path}
               to={path}
-              className={twMerge(
-                "text-decoration-none fs-5",
+              className={`text-decoration-none fs-6 ${
                 pathname === path ? "text-success fw-semibold" : "text-secondary"
-              )}
+              }`}
             >
               {label}
             </Link>
@@ -51,23 +55,27 @@ const Header = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="bg-white border-top py-3 px-3 d-lg-none">
-          <nav className="d-flex flex-column gap-3">
-            {navLinks.map(({ label, path }) => (
-              <Link
-                key={path}
-                to={path}
-                onClick={() => setIsMenuOpen(false)}
-                className={twMerge(
-                  "text-decoration-none fs-5",
-                  pathname === path ? "text-success fw-semibold" : "text-secondary"
-                )}
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-        </div>
+        <nav
+          id="mobile-menu"
+          className="bg-white border-top py-2 px-3 d-lg-none d-flex flex-column gap-2"
+          aria-label="Mobile primary navigation"
+          role="menu"
+        >
+          {navLinks.map(({ label, path }) => (
+            <Link
+              key={path}
+              to={path}
+              onClick={() => setIsMenuOpen(false)}
+              className={`text-decoration-none fs-6 ${
+                pathname === path ? "text-success fw-semibold" : "text-secondary"
+              }`}
+              role="menuitem"
+              aria-current={pathname === path ? "page" : undefined}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
       )}
     </header>
   );
