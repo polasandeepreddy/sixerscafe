@@ -1,33 +1,42 @@
-"use client"
+"use client";
 
-import { useBooking } from "../context/BookingContext"
-import SlotSelector from "./SlotSelector"
-import { User, Smartphone, CalendarDays } from "lucide-react"
+import { useBooking } from "../context/BookingContext";
+import SlotSelector from "./SlotSelector";
+import DateSelector from "./DateSelector";
+import { User, Smartphone, CalendarDays } from "lucide-react";
 
 const BookingForm = ({ className = "", onSubmit }) => {
-  const { formData, updateFormData, availableDates, isLoading } = useBooking()
+  const { formData, updateFormData, availableDates, isLoading } = useBooking();
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    updateFormData({ [name]: value })
-  }
+    const { name, value } = e.target;
+    updateFormData({ [name]: value });
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    if (formData.selectedSlots.length === 0) {
-      alert("Please select at least one slot")
-      return
+    e.preventDefault();
+    if (!formData.selectedSlots || formData.selectedSlots.length === 0) {
+      alert("Please select at least one slot");
+      return;
     }
-    onSubmit()
-  }
+    onSubmit();
+  };
 
   return (
-    <form onSubmit={handleSubmit} className={`bg-white rounded-xl shadow-md p-6 space-y-4 ${className}`}>
-      <h2 className="text-xl font-semibold text-green-700 text-center">Book Cricket Slot</h2>
+    <form
+      onSubmit={handleSubmit}
+      className={`bg-white rounded-xl shadow-md p-6 space-y-4 ${className}`}
+    >
+      <h2 className="text-xl font-semibold text-green-700 text-center">
+        Book Cricket Slot
+      </h2>
 
       {/* Full Name */}
       <div>
-        <label htmlFor="fullName" className="text-sm text-gray-700 flex items-center gap-1 mb-1">
+        <label
+          htmlFor="fullName"
+          className="text-sm text-gray-700 flex items-center gap-1 mb-1"
+        >
           <User size={14} />
           Full Name
         </label>
@@ -45,7 +54,10 @@ const BookingForm = ({ className = "", onSubmit }) => {
 
       {/* Mobile Number */}
       <div>
-        <label htmlFor="mobileNumber" className="text-sm text-gray-700 flex items-center gap-1 mb-1">
+        <label
+          htmlFor="mobileNumber"
+          className="text-sm text-gray-700 flex items-center gap-1 mb-1"
+        >
           <Smartphone size={14} />
           Mobile Number
         </label>
@@ -58,39 +70,30 @@ const BookingForm = ({ className = "", onSubmit }) => {
           required
           pattern="[0-9]{10}"
           placeholder="10-digit mobile number"
+          inputMode="numeric"
+          maxLength={10}
           className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none"
         />
       </div>
 
       {/* Date Selection */}
       <div>
-        <label htmlFor="date" className="text-sm text-gray-700 flex items-center gap-1 mb-1">
+        <label className="text-sm text-gray-700 flex items-center gap-1 mb-1">
           <CalendarDays size={14} />
           Select Date
         </label>
-        <select
-          id="date"
-          name="date"
-          value={formData.date}
-          onChange={handleInputChange}
-          required
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none bg-white"
-        >
-          {availableDates.map((date) => (
-            <option key={date} value={date}>
-              {new Date(date).toLocaleDateString("en-IN", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-              })}
-            </option>
-          ))}
-        </select>
+        <DateSelector
+          dates={availableDates}
+          selectedDate={formData.date}
+          onSelectDate={(date) => updateFormData({ date })}
+        />
       </div>
 
       {/* Slot Selector */}
       {isLoading ? (
-        <div className="py-4 text-center text-gray-500">Loading available slots...</div>
+        <div className="py-4 text-center text-gray-500">
+          Loading available slots...
+        </div>
       ) : (
         <SlotSelector className="pt-2" />
       )}
@@ -104,7 +107,7 @@ const BookingForm = ({ className = "", onSubmit }) => {
         Book Slots
       </button>
     </form>
-  )
-}
+  );
+};
 
-export default BookingForm
+export default BookingForm;

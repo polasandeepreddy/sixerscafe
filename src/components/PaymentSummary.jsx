@@ -1,92 +1,108 @@
-"use client"
+import React, { useState } from 'react';
+import { useBooking } from '../context/BookingContext';
+import { formatDisplayDate } from '../utils/dateUtils';
+import { QRCodeSVG } from 'qrcode.react';
 
-import { useState } from "react"
-import { useBooking } from "../context/BookingContext"
-import { formatDisplayDate } from "../utils/dateUtils"
-import { QRCodeSVG } from "qrcode.react"
+const PaymentSummary = ({ className = '', onPaymentComplete }) => {
+  const { formData } = useBooking();
+  const { selectedSlots, date } = formData;
+  const [screenshot, setScreenshot] = useState(null);
 
-const PaymentSummary = ({ className = "", onPaymentComplete }) => {
-  const { formData, totalAmount } = useBooking()
-  const { selectedSlots, date } = formData
-  const [screenshot, setScreenshot] = useState(null)
-  const [isUploading, setIsUploading] = useState(false)
+  // Calculate price per slot based on time
+  const getSlotPrice = (time) => {
+    const [startTime] = time.split(' - ');
+    const [hourStr, meridian] = startTime.split(' ');
+    const [hour] = hourStr.split(':');
+    let hour24 = parseInt(hour, 10);
+    if (meridian === 'PM' && hour24 !== 12) hour24 += 12;
+    if (meridian === 'AM' && hour24 === 12) hour24 = 0;
+
+    if (hour24 >= 6 && hour24 <= 17) return 500;
+    return 600;
+  };
+
+  // Calculate totalAmount based on selectedSlots
+  const totalAmount = selectedSlots.reduce(
+    (acc, slot) => acc + getSlotPrice(slot.time),
+    0
+  );
 
   const handleFileChange = (e) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      setIsUploading(true)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setScreenshot(reader.result)
-        setIsUploading(false)
-      }
-      reader.readAsDataURL(file)
+      const reader = new FileReader();
+      reader.onloadend = () => setScreenshot(reader.result);
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleSubmit = () => {
     if (!screenshot) {
-      alert("Please upload payment screenshot")
-      return
+      alert('Please upload payment screenshot');
+      return;
     }
-    onPaymentComplete(screenshot)
-  }
+    onPaymentComplete(screenshot);
+  };
 
   const upiDetails = {
     payeeName: "Sixers Cafe",
-    upiId: "sixers-cafe@upi",
+    upiId: "Q381279615@ybl",
     amount: totalAmount,
-    note: `Booking for ${formatDisplayDate(date)}`,
-  }
+    note: `Booking for ${formatDisplayDate(date)}`
+  };
 
-  const upiUri = `upi://pay?pa=${upiDetails.upiId}&pn=${encodeURIComponent(upiDetails.payeeName)}&am=${upiDetails.amount}&tn=${encodeURIComponent(upiDetails.note)}`
+  const upiUri = `upi://pay?pa=${upiDetails.upiId}&pn=${encodeURIComponent(
+    upiDetails.payeeName
+  )}&am=${upiDetails.amount}&tn=${encodeURIComponent(upiDetails.note)}`;
+
+  const openUpiApp = () => {
+    window.location.href = upiUri;
+  };
 
   if (selectedSlots.length === 0) {
     return (
-      <div className={`max-w-md mx-auto p-6 bg-gray-50 rounded-xl shadow-md text-center ${className}`}>
-        <h2 className="text-xl font-semibold text-gray-700 mb-3">Payment Summary</h2>
+      <div className={`max-w-md mx-4 my-6 p-4 bg-gray-50 rounded-xl shadow-md text-center ${className}`}>
+        <h2 className="text-lg font-semibold text-gray-700 mb-2">Payment Summary</h2>
         <p className="text-gray-500 text-sm">Please select at least one slot to view payment details.</p>
       </div>
-    )
+    );
   }
 
   return (
-    <div
-      className={`max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-6 ${className}`}
-    >
+    <>
       {/* Left side - Booking details */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Booking Details</h2>
+      <section className={`space-y-3 ${className}`}>
+        <h2 className="text-xl font-bold text-gray-800 border-b pb-2 mb-2">Booking Details</h2>
 
         <div>
-          <h3 className="text-xs font-semibold text-gray-500 uppercase mb-0.5">Date</h3>
-          <p className="text-base font-medium text-gray-900">{formatDisplayDate(date)}</p>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase">Date</h3>
+          <p className="text-sm font-medium text-gray-900">{formatDisplayDate(date)}</p>
         </div>
 
         <div>
-          <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Selected Slots</h3>
-          <div className="flex flex-wrap gap-2 max-w-full overflow-auto">
-            {selectedSlots.map((slot) => (
+          <h3 className="text-xs font-semibold text-gray-500 uppercase">Selected Slots</h3>
+          <div className="flex flex-wrap gap-2">
+            {selectedSlots.map(slot => (
               <span
                 key={slot.id}
-                className="bg-indigo-100 text-indigo-800 px-3 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap"
+                className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-xs font-semibold"
               >
-                {slot.time}
+                {slot.time} - ₹{getSlotPrice(slot.time)}
               </span>
             ))}
           </div>
         </div>
 
-        <div className="border-t border-gray-200 pt-4 space-y-2 text-gray-700">
-          <div className="flex justify-between font-medium text-sm">
+        <div className="border-t border-gray-200 pt-3 space-y-1 text-gray-700 text-sm">
+          <div className="flex justify-between">
             <span>Number of Slots</span>
             <span>{selectedSlots.length}</span>
           </div>
-          <div className="flex justify-between font-medium text-sm">
-            <span>Price per Slot</span>
-            <span>₹600</span>
+          <div className="flex justify-between">
+            <span className="italic text-gray-500 text-xs">Price per Slot</span>
+            <span className="italic text-gray-500 text-xs">₹500 or ₹600</span>
           </div>
-          <div className="flex justify-between font-bold text-lg text-indigo-700 border-t border-gray-300 pt-3">
+          <div className="flex justify-between font-bold text-indigo-700 border-t pt-2">
             <span>Total Amount</span>
             <span>₹{totalAmount}</span>
           </div>
@@ -94,72 +110,80 @@ const PaymentSummary = ({ className = "", onPaymentComplete }) => {
       </section>
 
       {/* Right side - Payment and Upload */}
-      <section className="space-y-4 flex flex-col items-center">
-        <h2 className="text-2xl font-bold text-gray-800 border-b pb-2 mb-4 w-full text-center">Payment</h2>
+      <section className="space-y-3 flex flex-col items-center mt-6">
+        <h2 className="text-xl font-bold text-gray-800 border-b pb-2 w-full text-center">
+          Payment
+        </h2>
 
-        <p className="text-gray-600 text-center font-semibold uppercase tracking-wide mb-3 text-sm">Scan to Pay</p>
+        <p className="text-gray-600 text-sm font-semibold text-center">Scan to Pay</p>
 
-        <div className="bg-indigo-50 rounded-xl p-4 shadow-md">
-          <QRCodeSVG value={upiUri} size={200} className="block mx-auto" />
+        <div className="bg-indigo-50 rounded-lg p-2 shadow">
+          <QRCodeSVG value={upiUri} size={180} />
         </div>
 
-        <div className="text-center text-gray-700 space-y-1 text-sm">
-          <p>
-            <span className="font-semibold">UPI ID:</span> {upiDetails.upiId}
-          </p>
-          <p>
-            <span className="font-semibold">Amount:</span> ₹{upiDetails.amount}
-          </p>
+        <button
+          onClick={openUpiApp}
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-4 rounded-md text-sm"
+        >
+          Pay Using UPI App
+        </button>
+
+        <div className="text-center text-gray-700 text-sm">
+          <p><strong>UPI ID:</strong> {upiDetails.upiId}</p>
+          <p><strong>Amount:</strong> ₹{upiDetails.amount}</p>
         </div>
 
+        {/* Tightly styled upload input */}
         <div className="w-full">
-          <label htmlFor="payment-screenshot" className="block text-gray-700 font-semibold mb-1 text-sm">
-            Upload Payment Screenshot
+          <label
+            htmlFor="payment-screenshot"
+            className="block text-gray-700 font-semibold text-sm mb-1"
+          >
+            Upload Screenshot
           </label>
           <input
             id="payment-screenshot"
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="w-full px-3 py-1.5 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer text-sm"
-            disabled={isUploading}
+            className="block w-full text-gray-600 text-sm
+              file:mr-3 file:py-1 file:px-2
+              file:border file:border-gray-300
+              file:rounded file:text-sm file:font-semibold
+              file:bg-indigo-100 file:text-indigo-700
+              hover:file:bg-indigo-200
+              cursor-pointer
+            "
           />
         </div>
 
-        {isUploading && (
+        {screenshot && (
           <div className="w-full text-center">
-            <p className="text-indigo-600 font-semibold mb-2 text-sm">Uploading screenshot...</p>
-          </div>
-        )}
-
-        {screenshot && !isUploading && (
-          <div className="w-full text-center">
-            <p className="text-green-600 font-semibold mb-2 text-sm">Screenshot uploaded successfully!</p>
+            <p className="text-green-600 text-sm font-semibold">Uploaded Successfully!</p>
             <img
-              src={screenshot || "/placeholder.svg"}
-              alt="Payment screenshot"
-              className="mx-auto max-h-36 rounded-lg object-contain"
+              src={screenshot}
+              alt="Payment Screenshot"
+              className="mx-auto max-h-32 rounded-md mt-1 object-contain"
             />
           </div>
         )}
 
         <button
           onClick={handleSubmit}
-          disabled={!screenshot || isUploading}
-          className={`w-full py-2 mt-auto rounded-lg text-white font-semibold transition-colors duration-300 text-sm
-            ${screenshot && !isUploading ? "bg-indigo-600 hover:bg-indigo-700" : "bg-indigo-300 cursor-not-allowed"}
+          disabled={!screenshot}
+          className={`w-full py-2 text-white font-semibold text-sm rounded-lg
+            ${screenshot ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-300 cursor-not-allowed'}
           `}
         >
           Confirm Payment
         </button>
 
-        <p className="text-xs text-gray-400 text-center mt-3">
-          Please ensure the screenshot clearly shows the transaction details. Your booking will be confirmed after admin
-          verification.
+        <p className="text-xs text-gray-400 text-center">
+          Upload a clear screenshot of the payment. Admin will verify and confirm your slot.
         </p>
       </section>
-    </div>
-  )
-}
+    </>
+  );
+};
 
-export default PaymentSummary
+export default PaymentSummary;

@@ -5,15 +5,18 @@ import { useEffect, useState, lazy, Suspense } from "react"
 import Header from "./components/Header"
 import Footer from "./components/Footer"
 import LoadingSpinner from "./components/LoadingSpinner"
-import DatabaseInitializer from "./components/DatabaseInitializer"
 import NotFoundPage from "./pages/NotFoundPage"
+import 'bootstrap/dist/css/bootstrap.min.css'
+import BookingStatus from './pages/BookingStatus';
 
-// Lazy load pages for better performance
+
+// Lazy load pages for performance
 const HomePage = lazy(() => import("./pages/HomePage"))
 const BookingPage = lazy(() => import("./pages/BookingPage"))
 const AdminPage = lazy(() => import("./pages/AdminPage"))
+const BookingConfirmation = lazy(() => import("./pages/BookingConfirmation"))
 
-// Loading component for suspense fallback
+// Page loader component
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
     <LoadingSpinner size="lg" />
@@ -24,12 +27,12 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const location = useLocation()
 
-  // Scroll to top on route change
+  // Scroll to top on every route change
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [location.pathname])
 
-  // Simulate initial load
+  // Simulate initial app load
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false)
@@ -50,12 +53,13 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/booking-confirmation/:bookingId" element={<BookingConfirmation />} />
+            <Route path="/status" element={<BookingStatus />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </main>
       <Footer />
-      <DatabaseInitializer />
     </div>
   )
 }

@@ -1,84 +1,86 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import BookingForm from "../components/BookingForm"
-import BookingConfirmation from "../components/BookingConfirmation"
-import PaymentSummary from "../components/PaymentSummary"
-import { useBooking } from "../context/BookingContext"
-import LoadingSpinner from "../components/LoadingSpinner"
+import { useState } from "react";
+import BookingForm from "../components/BookingForm";
+import BookingConfirmation from "./BookingConfirmation";
+import PaymentSummary from "../components/PaymentSummary";
+import { useBooking } from "../context/BookingContext"; // Correct context import
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function BookingPage() {
-  const [bookingConfirmed, setBookingConfirmed] = useState(false)
-  const [showPayment, setShowPayment] = useState(false)
-  const [bookingId, setBookingId] = useState("")
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState(null)
-  const { formData, addBooking, databaseInitialized, initializeDatabase } = useBooking()
+  const [bookingConfirmed, setBookingConfirmed] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [bookingId, setBookingId] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
+  const { formData, addBooking, databaseInitialized, initializeDatabase } = useBooking(); // Ensure correct function usage
 
   const handleBookingSubmit = () => {
-    setShowPayment(true)
-  }
+    setShowPayment(true);
+  };
 
   const handlePaymentComplete = async (screenshot) => {
-    setError(null)
-    setIsProcessing(true)
+    setError(null);
+    setIsProcessing(true);
     try {
-      // Check if database is initialized
       if (!databaseInitialized) {
-        await initializeDatabase()
+        await initializeDatabase(); // Ensure correct function call
       }
-
-      // Create new booking with payment screenshot
       const newBookingId = await addBooking({
         paymentScreenshot: screenshot,
-      })
+      });
 
-      setBookingId(newBookingId)
-      setBookingConfirmed(true)
+      setBookingId(newBookingId);
+      setBookingConfirmed(true);
     } catch (error) {
-      console.error("Error completing payment:", error)
-      setError("There was an error processing your booking. Please try again.")
+      console.error("Error completing payment:", error);
+      setError("There was an error processing your booking. Please try again.");
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
   if (isProcessing) {
     return (
-      <div className="min-h-screen bg-gray-100 py-12 flex items-center justify-center">
-        <div className="text-center">
+      <div className="d-flex vh-100 justify-content-center align-items-center bg-light">
+        <div className="text-center p-4 bg-white rounded shadow-sm">
           <LoadingSpinner size="lg" className="mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Processing Your Booking</h2>
-          <p className="text-gray-600">Please wait while we process your booking...</p>
+          <h2 className="h4 fw-semibold mb-3">Processing Your Booking</h2>
+          <p className="text-muted">Please wait while we process your booking...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12">
-      <div className="container mx-auto px-4">
+    <div className="min-vh-100 bg-light py-5">
+      <div className="container">
         {!bookingConfirmed ? (
           <>
-            <h1 className="text-3xl font-bold text-center mb-10">Book Your Cricket Slot</h1>
+            <h2 className="h3 fw-bold text-center mb-5 text-primary">Book Your Cricket Slot</h2>
             {error && (
-              <div className="max-w-2xl mx-auto mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                <p className="font-bold">Error</p>
-                <p>{error}</p>
+              <div className="alert alert-danger mx-auto" style={{ maxWidth: "600px" }}>
+                <strong>Error:</strong> {error}
               </div>
             )}
-            <div className="max-w-2xl mx-auto">
+            <div className="mx-auto" style={{ maxWidth: "600px" }}>
               {!showPayment ? (
-                <BookingForm onSubmit={handleBookingSubmit} />
+                <div className="card shadow-sm p-4">
+                  <BookingForm onSubmit={handleBookingSubmit} />
+                </div>
               ) : (
-                <PaymentSummary onPaymentComplete={handlePaymentComplete} />
+                <div className="card shadow-sm p-4">
+                  <PaymentSummary onPaymentComplete={handlePaymentComplete} />
+                </div>
               )}
             </div>
           </>
         ) : (
-          <BookingConfirmation bookingId={bookingId} />
+          <div className="card mx-auto shadow-sm p-4" style={{ maxWidth: "600px" }}>
+            <BookingConfirmation bookingId={bookingId} />
+          </div>
         )}
       </div>
     </div>
-  )
+  );
 }
