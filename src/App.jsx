@@ -7,8 +7,7 @@ import Footer from "./components/Footer"
 import LoadingSpinner from "./components/LoadingSpinner"
 import NotFoundPage from "./pages/NotFoundPage"
 import 'bootstrap/dist/css/bootstrap.min.css'
-import BookingStatus from './pages/BookingStatus';
-
+import BookingStatus from './pages/BookingStatus'
 
 // Lazy load pages for performance
 const HomePage = lazy(() => import("./pages/HomePage"))
@@ -38,6 +37,18 @@ function App() {
       setIsLoading(false)
     }, 500)
     return () => clearTimeout(timer)
+  }, [])
+
+  // Inject Google AdSense script
+  useEffect(() => {
+    const script = document.createElement("script")
+    script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4497855837866241"
+    script.async = true
+    script.crossOrigin = "anonymous"
+    document.body.appendChild(script)
+    return () => {
+      document.body.removeChild(script)
+    }
   }, [])
 
   if (isLoading) {
